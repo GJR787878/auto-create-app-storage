@@ -1,0 +1,41 @@
+name: Build Magisk Module
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Normalize line endings and permissions
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq dos2unix
+          find . -name "*.sh" -exec dos2unix {} \;
+          chmod 0755 service.d/auto_storage_fix.sh
+
+      - name: Pack Magisk module zip
+        run: |
+          zip -r auto-create-app-storage.zip module.prop service.d/
+          echo "=== zip contents ==="
+          unzip -l auto-create-app-storage.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: magisk-module
+          path: auto-create-app-storage.zip
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: auto-create-app-storage.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
