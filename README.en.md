@@ -5,7 +5,7 @@
 ![Platform](https://img.shields.io/badge/Android-11+-green.svg)
 ![Magisk](https://img.shields.io/badge/Magisk-26.0+-brightgreen.svg)
 
-**Language:** [中文](../README.md) | **English** | [Русский](README.ru.md)
+**Language:** [中文](README.md) | **English** | [Русский](README.ru.md)
 
 > Automatically creates missing `/storage/emulated/0/Android/data/<package>/{files,cache}` and `Android/obb` directories, fixing the false "Storage space is running out" error on custom ROMs.
 

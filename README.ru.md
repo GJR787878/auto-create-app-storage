@@ -5,7 +5,7 @@
 ![Platform](https://img.shields.io/badge/Android-11+-green.svg)
 ![Magisk](https://img.shields.io/badge/Magisk-26.0+-brightgreen.svg)
 
-**Язык:** [中文](../README.md) | [English](README.en.md) | **Русский**
+**Язык:** [中文](README.md) | [English](README.en.md) | **Русский**
 
 > Автоматически создаёт отсутствующие каталоги `/storage/emulated/0/Android/data/<пакет>/{files,cache}` и `Android/obb`, исправляя ложную ошибку «Место в хранилище заканчивается» на кастомных прошивках.
 
