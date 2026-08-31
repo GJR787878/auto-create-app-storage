@@ -5,6 +5,8 @@
 ![Platform](https://img.shields.io/badge/Android-11+-green.svg)
 ![Magisk](https://img.shields.io/badge/Magisk-26.0+-brightgreen.svg)
 
+**语言：** **中文** | [English](README.en.md) | [Русский](README.ru.md)
+
 > 自动补全缺失的 `/storage/emulated/0/Android/data/<包名>/{files,cache}` 与 `Android/obb` 目录，修复部分自定义 ROM 下应用误报"存储空间不足"的问题。
 
 ---
@@ -133,7 +135,9 @@ auto-create-app-storage/
 │   └── workflows/
 │       └── build.yml                    # GitHub Actions 自动构建与发布
 ├── LICENSE                              # MIT 开源协议
-└── README.md                            # 本文件
+├── README.md                            # 中文文档（本文件）
+├── README.en.md                         # English documentation
+└── README.ru.md                         # Документация на русском
 ```
 
 ---
