@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 全局属性定义（Android 要求每个属性名只能定义一次） -->
+    <attr name="glassSelected" format="boolean" />
+    <attr name="glassCornerRadius" format="dimension" />
+    <attr name="glassHeight" format="dimension" />
+
+    <!-- 玻璃胶囊按钮 -->
+    <declare-styleable name="GlassCapsuleButton">
+        <attr name="glassSelected" />
+        <attr name="glassCornerRadius" />
+    </declare-styleable>
+
+    <!-- 玻璃胶囊单选按钮 -->
+    <declare-styleable name="GlassRadioButton">
+        <attr name="glassCornerRadius" />
+    </declare-styleable>
+
+    <!-- 玻璃底部导航栏 -->
+    <declare-styleable name="GlassNavBar">
+        <attr name="glassCornerRadius" />
+        <attr name="glassHeight" />
+    </declare-styleable>
+</resources>

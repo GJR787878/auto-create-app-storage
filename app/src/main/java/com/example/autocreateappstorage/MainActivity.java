@@ -1,21 +1,19 @@
 package com.example.autocreateappstorage;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
-import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.gjr.glassbutton.GlassCapsuleButton;
 
 import java.io.File;
 import java.util.List;
@@ -26,8 +24,8 @@ public class MainActivity extends Activity {
     private TextView totalAppsText;
     private TextView dirsCreatedText;
     private TextView dirsMissingText;
-    private Button checkButton;
-    private Button fixButton;
+    private GlassCapsuleButton checkButton;
+    private GlassCapsuleButton fixButton;
     private Handler mainHandler;
 
     @Override
@@ -35,14 +33,16 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         mainHandler = new Handler(Looper.getMainLooper());
 
-        // 根布局
-        ScrollView scrollView = new ScrollView(this);
-        scrollView.setBackgroundColor(0xFF000000);
+        float density = getResources().getDisplayMetrics().density;
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(24), dp(48), dp(24), dp(48));
-        scrollView.addView(root);
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(0xFF000000);
+
+        ScrollView scrollView = new ScrollView(this);
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(Math.round(24 * density), Math.round(48 * density),
+                Math.round(24 * density), Math.round(48 * density));
 
         // 标题
         TextView title = new TextView(this);
@@ -50,91 +50,100 @@ public class MainActivity extends Activity {
         title.setTextColor(0xFFFFFFFF);
         title.setTextSize(28);
         title.setTypeface(null, Typeface.BOLD);
-        title.setPadding(0, 0, 0, dp(8));
-        root.addView(title);
+        title.setPadding(0, 0, 0, Math.round(8 * density));
+        content.addView(title);
 
-        // 副标题
         TextView subtitle = new TextView(this);
         subtitle.setText("AutoCreateAppStorage v2.0");
         subtitle.setTextColor(0xFF888888);
         subtitle.setTextSize(14);
-        subtitle.setPadding(0, 0, 0, dp(32));
-        root.addView(subtitle);
+        subtitle.setPadding(0, 0, 0, Math.round(32 * density));
+        content.addView(subtitle);
 
-        // 说明文字
+        // 说明
         TextView hint = new TextView(this);
         hint.setText("本模块通过 Magisk service.d 脚本在开机时自动补全所有第三方应用的 Android/data 私有目录，修复自定义 ROM 下应用误报\"存储空间不足\"的问题。\n\n点击下方按钮可手动检测当前存储目录状态。");
         hint.setTextColor(0xFFAAAAAA);
         hint.setTextSize(14);
-        hint.setLineSpacing(dp(4), 1.2f);
-        hint.setPadding(0, 0, 0, dp(32));
-        root.addView(hint);
+        hint.setLineSpacing(Math.round(4 * density), 1.2f);
+        hint.setPadding(0, 0, 0, Math.round(32 * density));
+        content.addView(hint);
 
-        // 状态显示区域
-        LinearLayout statusBox = new LinearLayout(this);
-        statusBox.setOrientation(LinearLayout.VERTICAL);
-        statusBox.setBackgroundColor(0xFF1A1A1A);
-        statusBox.setPadding(dp(20), dp(20), dp(20), dp(20));
-        statusBox.setPadding(dp(20), dp(20), dp(20), dp(20));
-        LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(
+        // 检测结果卡片（半透明玻璃风格）
+        LinearLayout statusCard = new LinearLayout(this);
+        statusCard.setOrientation(LinearLayout.VERTICAL);
+        statusCard.setBackgroundColor(0x1AFFFFFF);
+        statusCard.setPadding(Math.round(20 * density), Math.round(20 * density),
+                Math.round(20 * density), Math.round(20 * density));
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        statusParams.setMargins(0, 0, 0, dp(24));
-        root.addView(statusBox, statusParams);
+        cardParams.setMargins(0, 0, 0, Math.round(24 * density));
+        content.addView(statusCard, cardParams);
 
-        // 状态标题
-        TextView statusTitle = new TextView(this);
-        statusTitle.setText("检测结果");
-        statusTitle.setTextColor(0xFFFFFFFF);
-        statusTitle.setTextSize(16);
-        statusTitle.setTypeface(null, Typeface.BOLD);
-        statusTitle.setPadding(0, 0, 0, dp(12));
-        statusBox.addView(statusTitle);
+        TextView cardTitle = new TextView(this);
+        cardTitle.setText("检测结果");
+        cardTitle.setTextColor(0xFFFFFFFF);
+        cardTitle.setTextSize(16);
+        cardTitle.setTypeface(null, Typeface.BOLD);
+        cardTitle.setPadding(0, 0, 0, Math.round(12 * density));
+        statusCard.addView(cardTitle);
 
-        // 状态文字
         statusText = new TextView(this);
         statusText.setText("点击下方按钮开始检测");
         statusText.setTextColor(0xFF888888);
         statusText.setTextSize(14);
-        statusText.setPadding(0, 0, 0, dp(16));
-        statusBox.addView(statusText);
+        statusText.setPadding(0, 0, 0, Math.round(16 * density));
+        statusCard.addView(statusText);
 
-        // 统计行
-        totalAppsText = createStatRow(statusBox, "应用总数", "-");
-        dirsCreatedText = createStatRow(statusBox, "已创建目录", "-");
-        dirsMissingText = createStatRow(statusBox, "缺失目录", "-");
+        totalAppsText = createStatRow(statusCard, "应用总数", "-", density);
+        dirsCreatedText = createStatRow(statusCard, "已创建目录", "-", density);
+        dirsMissingText = createStatRow(statusCard, "缺失目录", "-", density);
 
-        // 检测按钮
-        checkButton = new Button(this);
+        // 操作区标题
+        TextView sectionLabel = new TextView(this);
+        sectionLabel.setText("▎操作");
+        sectionLabel.setTextColor(0xFFFFFFFF);
+        sectionLabel.setTextSize(15);
+        sectionLabel.setTypeface(null, Typeface.BOLD);
+        sectionLabel.setPadding(0, Math.round(12 * density), 0, Math.round(12 * density));
+        content.addView(sectionLabel);
+
+        // 玻璃胶囊按钮 - 检测存储目录
+        checkButton = new GlassCapsuleButton(this);
         checkButton.setText("检测存储目录");
-        checkButton.setTextColor(0xFFFFFFFF);
-        checkButton.setTextSize(16);
-        checkButton.setBackgroundColor(0xFF2196F3);
-        checkButton.setPadding(dp(24), dp(16), dp(24), dp(16));
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        btnParams.setMargins(0, 0, 0, dp(16));
         checkButton.setOnClickListener(v -> checkStorage());
-        root.addView(checkButton, btnParams);
+        content.addView(checkButton, matchWidth(density));
 
-        // 修复按钮
-        fixButton = new Button(this);
+        // 玻璃胶囊按钮 - 立即修复
+        fixButton = new GlassCapsuleButton(this);
         fixButton.setText("立即修复（需 Root）");
-        fixButton.setTextColor(0xFFFFFFFF);
-        fixButton.setTextSize(16);
-        fixButton.setBackgroundColor(0xFF4CAF50);
-        fixButton.setPadding(dp(24), dp(16), dp(24), dp(16));
         fixButton.setOnClickListener(v -> fixStorage());
-        root.addView(fixButton, btnParams);
+        content.addView(fixButton, matchWidth(density));
 
-        setContentView(scrollView);
+        // 底部提示
+        TextView footerHint = new TextView(this);
+        footerHint.setText("Magisk 模块负责开机自动创建，APK 提供管理界面和手动检测/修复");
+        footerHint.setTextColor(0xFF666666);
+        footerHint.setTextSize(12);
+        footerHint.setGravity(Gravity.CENTER);
+        footerHint.setPadding(0, Math.round(48 * density), 0, 0);
+        content.addView(footerHint);
+
+        scrollView.addView(content, new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        root.addView(scrollView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        setContentView(root);
     }
 
-    private TextView createStatRow(LinearLayout parent, String label, String value) {
+    private TextView createStatRow(LinearLayout parent, String label, String value, float density) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, dp(6), 0, dp(6));
+        row.setPadding(0, Math.round(6 * density), 0, Math.round(6 * density));
 
         TextView labelView = new TextView(this);
         labelView.setText(label);
@@ -154,8 +163,17 @@ public class MainActivity extends Activity {
         return valueView;
     }
 
+    private LinearLayout.LayoutParams matchWidth(float density) {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = Math.round(12 * density);
+        return lp;
+    }
+
     private void checkStorage() {
         checkButton.setEnabled(false);
+        checkButton.setGlassSelected(true);
         statusText.setText("正在检测...");
         statusText.setTextColor(0xFFFFC107);
 
@@ -166,12 +184,11 @@ public class MainActivity extends Activity {
             StringBuilder missingList = new StringBuilder();
 
             try {
-                PackageManager pm = getPackageManager();
-                List<ApplicationInfo> apps = pm.getInstalledApplications(0);
+                android.content.pm.PackageManager pm = getPackageManager();
+                List<android.content.pm.ApplicationInfo> apps = pm.getInstalledApplications(0);
 
-                for (ApplicationInfo app : apps) {
-                    // 只检测第三方应用
-                    if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) continue;
+                for (android.content.pm.ApplicationInfo app : apps) {
+                    if ((app.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) continue;
 
                     totalApps++;
                     String pkg = app.packageName;
@@ -210,19 +227,20 @@ public class MainActivity extends Activity {
                     statusText.setTextColor(0xFFF44336);
                 }
                 checkButton.setEnabled(true);
+                checkButton.setGlassSelected(false);
             });
         }).start();
     }
 
     private void fixStorage() {
         fixButton.setEnabled(false);
+        fixButton.setGlassSelected(true);
         statusText.setText("正在执行修复...");
         statusText.setTextColor(0xFFFFC107);
 
         new Thread(() -> {
             boolean success = false;
             try {
-                // 执行 Magisk 模块的修复脚本
                 Process su = Runtime.getRuntime().exec("su");
                 java.io.DataOutputStream os = new java.io.DataOutputStream(su.getOutputStream());
                 os.writeBytes("sh /data/adb/modules/auto_create_app_storage/service.d/auto_storage_fix.sh &\n");
@@ -245,11 +263,8 @@ public class MainActivity extends Activity {
                     statusText.setTextColor(0xFFF44336);
                 }
                 fixButton.setEnabled(true);
+                fixButton.setGlassSelected(false);
             });
         }).start();
-    }
-
-    private int dp(int value) {
-        return (int) (value * getResources().getDisplayMetrics().density);
     }
 }
