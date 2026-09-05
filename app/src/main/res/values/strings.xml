@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoCreateAppStorage</string>
+    <string name="app_title">自动创建应用存储</string>
+    <string name="btn_check_storage">检测存储目录</string>
+    <string name="btn_fix_storage">立即修复</string>
+    <string name="status_checking">正在检测...</string>
+    <string name="status_ok">✓ 所有应用存储目录正常</string>
+    <string name="status_fixed">✓ 修复完成</string>
+    <string name="total_apps">应用总数</string>
+    <string name="dirs_created">已创建目录</string>
+    <string name="dirs_missing">缺失目录</string>
+    <string name="hint_text">本模块通过 Magisk service.d 脚本在开机时自动补全所有第三方应用的 Android/data 私有目录，修复自定义 ROM 下应用误报"存储空间不足"的问题。\n\n点击下方按钮可手动检测当前存储目录状态。</string>
+</resources>
