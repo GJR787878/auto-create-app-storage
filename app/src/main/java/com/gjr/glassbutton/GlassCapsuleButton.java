@@ -5,6 +5,8 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.Button;
 
+import com.example.autocreateappstorage.R;
+
 /**
  * 玻璃拟态胶囊按钮。
  *
