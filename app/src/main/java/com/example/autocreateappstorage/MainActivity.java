@@ -219,24 +219,40 @@ public class MainActivity extends AppCompatActivity {
                 android.content.pm.PackageManager pm = getPackageManager();
                 List<android.content.pm.ApplicationInfo> apps = pm.getInstalledApplications(0);
 
+                // 用 su 检测目录（Root 权限绕过分区存储，普通 File.exists() 在 Android 11+ 不准）
+                StringBuilder suCmd = new StringBuilder();
                 for (android.content.pm.ApplicationInfo app : apps) {
                     if ((app.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) continue;
-
                     totalApps++;
                     String pkg = app.packageName;
-                    File dataDir = new File("/storage/emulated/0/Android/data/" + pkg);
-                    File filesDir = new File(dataDir, "files");
-                    File cacheDir = new File(dataDir, "cache");
+                    // 输出格式：pkg|exists（1=存在，0=缺失）
+                    suCmd.append("if [ -d \"/storage/emulated/0/Android/data/").append(pkg).append("/files\" ] && [ -d \"/storage/emulated/0/Android/data/").append(pkg).append("/cache\" ]; then echo \"").append(pkg).append("|1\"; else echo \"").append(pkg).append("|0\"; fi\n");
+                }
 
-                    if (dataDir.exists() && filesDir.exists() && cacheDir.exists()) {
-                        dirsCreated++;
-                    } else {
-                        dirsMissing++;
-                        if (missingList.length() < 500) {
-                            missingList.append(pkg).append("\n");
+                // 执行 su 命令
+                Process su = Runtime.getRuntime().exec("su");
+                java.io.DataOutputStream os = new java.io.DataOutputStream(su.getOutputStream());
+                os.writeBytes(suCmd.toString());
+                os.writeBytes("exit\n");
+                os.flush();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(su.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split("\\|");
+                    if (parts.length == 2) {
+                        if (parts[1].equals("1")) {
+                            dirsCreated++;
+                        } else {
+                            dirsMissing++;
+                            if (missingList.length() < 500) {
+                                missingList.append(parts[0]).append("\n");
+                            }
                         }
                     }
                 }
+                reader.close();
+                su.waitFor();
             } catch (Exception e) {
                 e.printStackTrace();
             }
