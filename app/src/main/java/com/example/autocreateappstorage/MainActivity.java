@@ -353,21 +353,51 @@ public class MainActivity extends AppCompatActivity {
 
             final String finalLog = logContent.toString();
             mainHandler.post(() -> {
-                // §3.6 深色弹窗
+                // §3.6 深色弹窗 + 玻璃胶囊按钮
+                LinearLayout dialogRoot = new LinearLayout(this);
+                dialogRoot.setOrientation(LinearLayout.VERTICAL);
+                dialogRoot.setBackgroundColor(0xFF1C1C1E);
+                int pad = Math.round(20 * density);
+                dialogRoot.setPadding(pad, Math.round(20 * density), pad, Math.round(16 * density));
+
+                // 标题
+                TextView title = new TextView(this);
+                title.setText("修复日志");
+                title.setTextColor(0xFFFFFFFF);
+                title.setTextSize(18);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setPadding(0, 0, 0, Math.round(12 * density));
+                dialogRoot.addView(title);
+
+                // 日志内容（包 ScrollView，§6 #29）
                 ScrollView scroll = new ScrollView(this);
                 TextView logView = new TextView(this);
                 logView.setText(finalLog);
                 logView.setTextColor(0xFFCCCCCC);
                 logView.setTextSize(13);
-                logView.setPadding(Math.round(16 * density), Math.round(16 * density),
-                        Math.round(16 * density), Math.round(16 * density));
+                logView.setPadding(0, 0, 0, Math.round(16 * density));
                 scroll.addView(logView);
+                LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                scrollLp.height = Math.round(300 * density); // 固定高度
+                dialogRoot.addView(scroll, scrollLp);
 
-                new AlertDialog.Builder(this)
-                        .setTitle("修复日志")
-                        .setView(scroll)
-                        .setPositiveButton("关闭", null)
-                        .show();
+                // 底部玻璃胶囊关闭按钮
+                GlassCapsuleButton closeBtn = new GlassCapsuleButton(this);
+                closeBtn.setText("关闭");
+                LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                closeLp.topMargin = Math.round(16 * density);
+                dialogRoot.addView(closeBtn, closeLp);
+
+                final AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setView(dialogRoot)
+                        .create();
+                dialog.show();
+
+                closeBtn.setOnClickListener(v -> dialog.dismiss());
 
                 logButton.setEnabled(true);
                 logButton.setGlassSelected(false);
